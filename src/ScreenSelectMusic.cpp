@@ -31,6 +31,7 @@
 #include "RageInput.h"
 #include "OptionsList.h"
 #include "RageFileManager.h"
+#include "MemoryCardManager.h"
 
 #include <cmath>
 #include <vector>
@@ -2042,6 +2043,56 @@ bool ScreenSelectMusic::can_open_options_list(PlayerNumber pn)
 	return true;
 }
 
+int ScreenSelectMusic::SetLocalProfile(PlayerNumber pn, int profileIndex)
+{
+	if (profileIndex >= PROFILEMAN->GetNumLocalProfiles())
+	{
+		return 1;
+	}
+	else if (profileIndex < 0)
+	{
+		return 2;
+	}
+	
+	RString newProfileID = PROFILEMAN->GetLocalProfileIDFromIndex(profileIndex);
+
+	if (GAMESTATE->IsHumanPlayer(PLAYER_1))
+	{
+		if (Basename(PROFILEMAN->GetProfileDir(ProfileSlot_Player1)) == newProfileID)
+		{
+			return 3;
+		}
+	}
+
+	if (GAMESTATE->IsHumanPlayer(PLAYER_2))
+	{
+		if (Basename(PROFILEMAN->GetProfileDir(ProfileSlot_Player2)) == newProfileID)
+		{
+			return 4;
+		}
+	}
+
+	if(!GAMESTATE->IsHumanPlayer(pn))
+	{
+		GAMESTATE->JoinPlayer(pn);
+		SCREENMAN->PlayStartSound();
+	}
+
+	MEMCARDMAN->UnlockCard(pn);
+	MEMCARDMAN->UnmountCard(pn);
+	PROFILEMAN->UnloadProfile(pn);
+
+	PROFILEMAN->m_sDefaultLocalProfileID[pn].Set(newProfileID);
+	PROFILEMAN->LoadLocalProfileFromMachine(pn);
+	GAMESTATE->LoadCurrentSettingsFromProfile(pn);
+
+	Message msg(MessageIDToString(Message_PlayerProfileSet));
+	msg.SetParam("Player", pn);
+	MESSAGEMAN->Broadcast(msg);
+
+	return 0;
+}
+
 
 // lua start
 #include "LuaBinding.h"
@@ -2071,12 +2122,22 @@ public:
 		return 1;
 	}
 
+	static int SetLocalProfile( T* p, lua_State *L )
+	{
+		PlayerNumber pn = Enum::Check<PlayerNumber>(L, 1);
+		int profileIndex = IArg(2);
+		int ret = p->SetLocalProfile(pn, profileIndex);
+		lua_pushinteger(L, ret);
+		return 1;
+	}
+
 	LunaScreenSelectMusic()
 	{
   		ADD_METHOD( GetGoToOptions );
 		ADD_METHOD( GetMusicWheel );
 		ADD_METHOD( OpenOptionsList );
 		ADD_METHOD( CanOpenOptionsList );
+		ADD_METHOD( SetLocalProfile );
 	}
 };
 

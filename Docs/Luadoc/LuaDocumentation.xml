@@ -5477,6 +5477,18 @@ Details of the <code>event</code> table:
 	<Function name='OpenOptionsList' return='void' arguments='PlayerNumber pn'>
 		Opens the OptionsList for Player <code>pn</code>
 	</Function>
+	<Function name='SetLocalProfile' theme='_fallback' return='int' arguments='PlayerNumber pn, int profileIndex'>
+		Sets given player's profile to the local profile associated with the given index.
+		Profile collisions and player joins are handled internally.<br /><br />
+		Emits <code>PlayerProfileSet</code> message used by the themes to update screens on
+		successful profile change.<br /><br />
+		Returns:<br />
+		• <code>0</code> on success<br />
+		• <code>1</code> when <code>profileIndex</code> exceeds maximum legal profile index<br />
+		• <code>2</code> when <code>profileIndex</code> is below 0<br />
+		• <code>3</code> when <code>profileIndex</code> collies with current P1 profile<br />
+		• <code>4</code> when <code>profileIndex</code> collies with current P2 profile
+	</Function>
 	<Function name='setupcoursestagemods' theme='_fallback' return='void' arguments=''>
 		[02 StageMods.lua] Sets up modifiers for course modes.
 	</Function>

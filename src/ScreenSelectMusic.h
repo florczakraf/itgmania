@@ -58,6 +58,8 @@ public:
 	// Lua
 	virtual void PushSelf( lua_State *L );
 
+	int SetLocalProfile( PlayerNumber pn, int profileIndex );
+
 protected:
 	virtual bool GenericTweenOn() const { return true; }
 	virtual bool GenericTweenOff() const { return true; }

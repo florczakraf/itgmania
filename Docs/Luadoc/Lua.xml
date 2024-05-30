@@ -1745,6 +1745,7 @@
 			<Function name='GetGoToOptions'/>
 			<Function name='GetMusicWheel'/>
 			<Function name='OpenOptionsList'/>
+			<Function name='SetLocalProfile'/>
 			<Function name='setupcoursestagemods'/>
 			<Function name='setupmusicstagemods'/>
 		</Class>
