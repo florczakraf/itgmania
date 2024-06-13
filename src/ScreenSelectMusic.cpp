@@ -2055,27 +2055,23 @@ int ScreenSelectMusic::SetLocalProfile(PlayerNumber pn, int profileIndex)
 	}
 	
 	RString newProfileID = PROFILEMAN->GetLocalProfileIDFromIndex(profileIndex);
+	ProfileSlot profileSlots[NUM_PLAYERS] = {ProfileSlot_Player1, ProfileSlot_Player2};
 
-	if (GAMESTATE->IsHumanPlayer(PLAYER_1))
-	{
-		if (Basename(PROFILEMAN->GetProfileDir(ProfileSlot_Player1)) == newProfileID)
-		{
-			return 3;
-		}
-	}
-
-	if (GAMESTATE->IsHumanPlayer(PLAYER_2))
-	{
-		if (Basename(PROFILEMAN->GetProfileDir(ProfileSlot_Player2)) == newProfileID)
-		{
-			return 4;
-		}
-	}
-
+	// we have to make sure there's at least one human player to avoid crash on ejecting
 	if(!GAMESTATE->IsHumanPlayer(pn))
 	{
+		PROFILEMAN->UnloadProfile(pn);
 		GAMESTATE->JoinPlayer(pn);
-		SCREENMAN->PlayStartSound();
+	}
+	ASSERT(GAMESTATE->GetNumPlayersEnabled() > 0);
+
+	// eject opponent if they use the profile we're about to load
+	PlayerNumber opponent = OPPOSITE_PLAYER[pn];
+	if (GAMESTATE->IsHumanPlayer(opponent) && Basename(PROFILEMAN->GetProfileDir(profileSlots[opponent])) == newProfileID)
+	{
+		GAMESTATE->UnjoinPlayer(opponent);
+		MEMCARDMAN->UnlockCard(opponent);
+		MEMCARDMAN->UnmountCard(opponent);
 	}
 
 	MEMCARDMAN->UnlockCard(pn);
