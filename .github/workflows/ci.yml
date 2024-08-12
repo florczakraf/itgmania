@@ -77,6 +77,21 @@ jobs:
       - name: Build
         run: cmake --build build
 
+  macos-build-universal:
+    name: macOS (Universal)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Install dependencies
+        run: brew install
+          nasm
+      - name: Configure
+        run: cmake -B build -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+      - name: Build
+        run: cmake --build build -j "$(sysctl -n hw.logicalcpu)"
+
   validate-xml-docs:
     name: Validate Lua.xml, LuaDocumentation.xml
     runs-on: ubuntu-latest
