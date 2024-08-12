@@ -33,7 +33,7 @@ jobs:
       - name: Configure
         run: cmake -B build
       - name: Build
-        run: cmake --build build
+        run: cmake --build build -j "$(nproc)"
 
   macos-build-arm64:
     name: macOS (M1)
@@ -65,6 +65,21 @@ jobs:
       - name: Build
         run: cmake --build build
 
+  macos-build-universal:
+    name: macOS (Universal)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Install dependencies
+        run: brew install
+          nasm
+      - name: Configure
+        run: cmake -B build -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+      - name: Build
+        run: cmake --build build -j "$(sysctl -n hw.logicalcpu)"
+ 
   windows-build:
     name: Windows
     runs-on: windows-latest
@@ -76,6 +91,11 @@ jobs:
         run: cmake -B build
       - name: Build
         run: cmake --build build
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binaries
+          path: build/Program/
 
   validate-xml-docs:
     name: Validate Lua.xml, LuaDocumentation.xml
