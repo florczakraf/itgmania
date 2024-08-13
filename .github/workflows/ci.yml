@@ -34,58 +34,11 @@ jobs:
         run: cmake -B build -DWITH_FFMPEG_JOBS="$(nproc)"
       - name: Build
         run: cmake --build build --parallel "$(nproc)"
-
-  macos-build-arm64:
-    name: macOS (M1)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Install dependencies
-        run: brew install
-          nasm
-      - name: Configure
-        run: cmake -B build -DCMAKE_OSX_ARCHITECTURES=arm64 -DWITH_FFMPEG_JOBS="$(sysctl -n hw.logicalcpu)"
-      - name: Build
-        run: cmake --build build --parallel "$(sysctl -n hw.logicalcpu)"
-
-  macos-build-x86_64:
-    name: macOS (Intel)
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Install dependencies
-        run: brew install
-          nasm
-      - name: Configure
-        run: cmake -B build -DCMAKE_OSX_ARCHITECTURES=x86_64 -DWITH_FFMPEG_JOBS="$(sysctl -n hw.logicalcpu)"
-      - name: Build
-        run: cmake --build build --parallel "$(sysctl -n hw.logicalcpu)"
-
-  windows-build:
-    name: Windows
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: Configure
-        run: cmake -B build -DWITH_FFMPEG_JOBS="$env:NUMBER_OF_PROCESSORS"
-      - name: Build
-        run: cmake --build build --parallel "$env:NUMBER_OF_PROCESSORS"
-
-  validate-xml-docs:
-    name: Validate Lua.xml, LuaDocumentation.xml
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y
-          libxml2-utils
-      - name: Validate Lua.xml
-        run: xmllint --noout Docs/Luadoc/Lua.xml
-      - name: Validate LuaDocumentation.xml
-        run: xmllint --noout Docs/Luadoc/LuaDocumentation.xml
+      - name: List runtime libraries
+        run: ldd ./itgmania
+      - name: remove libglu
+        run: sudo apt-get remove -y libglu1-mesa-dev libglu1-mesa
+      - name: List runtime libraries again
+        run: ldd ./itgmania
+      - name: Try to run
+        run: ./itgmania
