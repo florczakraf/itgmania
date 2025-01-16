@@ -333,7 +333,7 @@ list(APPEND SMDATA_LINK_LIB "mad"
                             "glew"
                             "tomcrypt"
                             "tommath"
-                            "${LIBJPEG_TURBO_LIBRARY}"
+                            "libjpeg-turbo"
                             "zlib"
                             "png"
                             "jsoncpp"
@@ -446,10 +446,9 @@ else() # Unix / Linux TODO: Remember to find and locate the zip archive files.
 endif()
 
 target_link_libraries("${SM_EXE_NAME}" ${SMDATA_LINK_LIB})
-add_dependencies("${SM_EXE_NAME}" libjpeg_turbo_project)
 
 list(APPEND SM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-            "${SM_GENERATED_SRC_DIR}" "${LIBJPEG_TURBO_INCLUDE_DIR}")
+            "${SM_GENERATED_SRC_DIR}")
 
 if(APPLE)
   list(APPEND SM_INCLUDE_DIRS "archutils/Unix")

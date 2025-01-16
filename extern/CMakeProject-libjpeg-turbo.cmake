@@ -7,6 +7,7 @@ ExternalProject_Add(
   libjpeg_turbo_project
 
   SOURCE_DIR "${SM_EXTERN_DIR}/libjpeg-turbo"
+  INSTALL_DIR "${CMAKE_BINARY_DIR}/libjpeg-turbo-install"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/libjpeg-turbo-install
              -DENABLE_SHARED=OFF
              -DENABLE_STATIC=ON
@@ -15,11 +16,14 @@ ExternalProject_Add(
   BUILD_ALWAYS OFF
 )
 
-add_library(libjpeg-turbo STATIC IMPORTED)
-set(LIBJPEG_TURBO_INCLUDE_DIR "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/include" CACHE INTERNAL "libjpeg-turbo include")
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/include") # This needs to be created immediately, otherwise project generation will fail
+
+add_library(libjpeg-turbo STATIC IMPORTED GLOBAL)
+add_dependencies(libjpeg-turbo libjpeg_turbo_project)
+target_include_directories(libjpeg-turbo INTERFACE "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/include")
 
 if(WIN32)
-  set(LIBJPEG_TURBO_LIBRARY "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/lib/turbojpeg-static.lib" CACHE INTERNAL "libjpeg-turbo library")
+  set_property(TARGET libjpeg-turbo PROPERTY IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/lib/turbojpeg-static.lib")
 else()
-  set(LIBJPEG_TURBO_LIBRARY "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/lib/libturbojpeg.a" CACHE INTERNAL "libjpeg-turbo library")
+  set_property(TARGET libjpeg-turbo PROPERTY IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libjpeg-turbo-install/lib/libturbojpeg.a")
 endif()
